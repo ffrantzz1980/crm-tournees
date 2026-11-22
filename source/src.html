@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f6feb">
+<!--PWA-->
+<title>CRM Tournées</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2330;--muted:#647083;--line:#e3e6eb;--accent:#1f6feb;--accent-ink:#fff;
+--red:#c93c37;--red-bg:#fdecea;--amber:#9a6700;--amber-bg:#fff4d6;--green:#1a7f37;--green-bg:#e6f4ea;--grey-bg:#eef0f3}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#11151b;--card:#1a2029;--ink:#e6e9ee;--muted:#98a2b3;--line:#2c3440;--accent:#4c8dff;
+--red:#ff7b72;--red-bg:#3a1d1d;--amber:#e3b341;--amber-bg:#3a2f12;--green:#56d364;--green-bg:#16301f;--grey-bg:#262d38}}
+:root[data-theme=dark]{--bg:#11151b;--card:#1a2029;--ink:#e6e9ee;--muted:#98a2b3;--line:#2c3440;--accent:#4c8dff;
+--red:#ff7b72;--red-bg:#3a1d1d;--amber:#e3b341;--amber-bg:#3a2f12;--green:#56d364;--green-bg:#16301f;--grey-bg:#262d38}
+:root[data-theme=dark],:root[data-theme=dark] body{color-scheme:dark}
+body.compact .row{padding:6px 10px}body.compact .list{gap:4px}body.compact .row .sub{font-size:12px}body.compact{font-size:14px}
+.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}@media (max-width:560px){.setgrid{grid-template-columns:1fr}}
+.setgrid label{font-size:13px;color:var(--muted);display:block;margin-bottom:2px}.setgrid input,.setgrid select{width:100%}
+.checks label{display:flex;gap:8px;align-items:center;padding:3px 0;font-size:14px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:default}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 9px;max-width:100%}
+main{max-width:1100px;margin:0 auto;padding:12px 16px 60px}
+.filters{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:10px}
+.mobile-only{display:none}
+.summary{color:var(--muted);font-size:13px;margin:6px 0 10px;display:flex;gap:12px;flex-wrap:wrap}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;cursor:pointer}
+.row:hover{border-color:var(--accent)}
+.row .name{font-weight:600}
+.row .sub{color:var(--muted);font-size:13px}
+.row .right{text-align:right;font-size:13px;color:var(--muted)}
+.badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--grey-bg);color:var(--ink);white-space:nowrap}
+.b-red{background:var(--red-bg);color:var(--red)}.b-amber{background:var(--amber-bg);color:var(--amber)}.b-green{background:var(--green-bg);color:var(--green)}
+.empty{text-align:center;color:var(--muted);padding:50px 10px;background:var(--card);border:1px dashed var(--line);border-radius:12px}
+.more{margin:12px auto;display:block}
+dialog{border:none;border-radius:14px;padding:0;width:min(720px,100vw - 16px);max-height:92vh;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:#0008}
+.dhead{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:10px;align-items:flex-start}
+.dhead h2{font-size:18px;margin:0;flex:1}
+.dbody{padding:12px 16px 18px}
+.sec{margin:14px 0}.sec h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 6px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 10px;font-size:14px}.kv dt{color:var(--muted)}.kv dd{margin:0;white-space:pre-wrap;word-break:break-word}
+@media (max-width:560px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}
+header{gap:6px}header h1{font-size:16px;flex:1}.tabs{order:5;width:100%;margin:0;justify-content:space-between}.tabs button{flex:1;padding:6px 4px}
+header>button{padding:6px 9px;font-size:14px}#btnGeo{display:none}
+.mobile-only{display:inline-block}.filters:not(.open)>select{display:none}}
+.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.visits{list-style:none;padding:0;margin:8px 0 0}.visits li{display:flex;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+.visits li span{flex:1}
+.x{border:none;background:none;color:var(--muted);padding:2px 6px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;max-width:calc(100vw - 32px);z-index:20;display:none}
+.progress{height:6px;background:var(--grey-bg);border-radius:4px;overflow:hidden;margin-top:6px}.progress div{height:100%;background:var(--accent);width:0}
+.note{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:4px;margin-right:auto}.tabs button{border:none;background:none;font-weight:600;color:var(--muted);padding:7px 10px;border-bottom:2px solid transparent;border-radius:0}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tgrid{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:12px;align-items:start}
+@media (max-width:820px){.tgrid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.panel label{display:block;font-size:13px;color:var(--muted);margin:8px 0 3px}
+#map{height:520px;border-radius:12px;border:1px solid var(--line);background:var(--grey-bg)}
+@media (max-width:820px){#map{height:340px}}
+.stops{list-style:none;padding:0;margin:8px 0 0;counter-reset:s}
+.stops li{display:grid;grid-template-columns:28px 1fr auto;gap:6px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line)}
+.num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:12px;font-weight:700}
+.stops .acts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.stops .acts button,.stops .acts a{font-size:12px;padding:3px 8px}
+.done .num{background:var(--green)}
+.leaflet-container{font:inherit}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi .v{font-size:26px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}.kpi .l{font-size:13px;color:var(--muted)}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media (max-width:760px){.dgrid{grid-template-columns:1fr}}
+.ph{font-size:14px;margin:0 0 8px}
+.mini{list-style:none;padding:0;margin:0}.mini li{display:flex;gap:8px;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:14px;cursor:pointer}
+.mini li:hover{color:var(--accent)}.mini li span:last-child{color:var(--muted);white-space:nowrap;font-size:13px}
+.stack{display:flex;height:14px;border-radius:4px;overflow:hidden;background:var(--grey-bg)}
+.stack i{display:block;height:100%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}.legend b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.arow{display:grid;grid-template-columns:52px 1fr 80px;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:120px;border-bottom:1px solid var(--line)}
+.bars div{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:1px;position:relative}
+.bars div span{position:absolute;top:-17px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted)}
+.blabels{display:flex;gap:4px;font-size:10px;color:var(--muted);margin-top:3px}.blabels span{flex:1;text-align:center}
+.qact{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.qact .btn{text-decoration:none;font-size:14px;padding:5px 12px}
+.fk{grid-template-columns:repeat(3,1fr);margin:6px 0 10px}.fk .kpi{padding:8px 10px}.fk .v2{font-weight:700;font-size:15px}
+.stbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stbar label{font-size:13px;color:var(--muted);display:block;margin-bottom:2px}.stbar select{width:100%}
+.ftabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:14px 0 6px;overflow-x:auto}
+.ftabs button{border:none;background:none;border-bottom:2px solid transparent;border-radius:0;color:var(--muted);font-weight:600;padding:8px 12px;white-space:nowrap}
+.ftabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+@media (max-width:560px){.stbar{grid-template-columns:1fr 1fr}.fk{grid-template-columns:1fr 1fr 1fr}.fk .v2{font-size:13px}
+dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0}}
+</style>
+<style>/*LEAFLETCSS*/</style>
+</head>
+<body>
+<header>
+  <h1 id="appTitle">CRM Tournées</h1>
+  <nav class="tabs"><button data-tab="clients" class="on">Clients</button><button data-tab="tour">Tournée</button><button data-tab="dash">Pilotage</button></nav>
+  <button class="primary" id="btnNew">+ Nouveau client</button>
+  <button id="btnImport">Importer un fichier</button>
+  <button id="btnGeo" title="Calculer les coordonnées GPS des adresses">Géocoder</button>
+  <button id="btnMenu">Sauvegarde</button>
+  <button id="btnSet" title="Paramètres" aria-label="Paramètres">⚙</button>
+  <input type="file" id="fileIn" accept=".xlsx,.xls,.csv" hidden>
+  <input type="file" id="backupIn" accept=".json" hidden>
+</header>
+<main>
+  <div id="geoBox" style="display:none" class="summary"><div style="flex:1"><span id="geoTxt"></span><div class="progress"><div id="geoBar"></div></div></div></div>
+  <div class="filters" id="filters">
+    <div class="inline" style="grid-column:1/-1;flex-wrap:nowrap"><input type="search" id="q" placeholder="Rechercher un nom, une ville, un code, un contact…" style="flex:1"><button id="btnFilt" class="mobile-only">Filtres</button></div>
+    <select id="fSect"><option value="">Tous secteurs</option><option value="86">86 · lun, mer</option><option value="37">37 · mar, jeu</option></select>
+    <select id="fActif"><option value="">Actifs et inactifs</option><option value="1">Actifs</option><option value="0">Inactifs</option></select>
+    <select id="fPrio"><option value="">Toutes priorités</option><option value="late">À visiter (récurrents échus)</option><option value="rec">Récurrents</option><option value="old" id="optOld">Pas vu depuis 60 j et plus</option><option value="never">Jamais visités</option></select>
+    <select id="fAct"><option value="">Statut : toutes activités</option><option>Huile</option><option>DID</option><option>DIND</option><option>Hydro</option></select>
+    <select id="fStat"><option value="">Tous statuts</option><option>Actif</option><option>Inactif</option><option>Inactif Perdu</option><option>Perdu</option><option>Prospect</option><option>N/A</option></select>
+    <select id="fVille"><option value="">Toutes villes</option></select>
+    <select id="fSeg"><option value="">Tous segments</option></select>
+    <select id="sort"><option value="prio">Tri : priorité</option><option value="name">Tri : nom</option><option value="ville">Tri : ville</option><option value="last">Tri : dernière visite</option></select>
+  </div>
+  <div class="summary" id="summary"></div>
+  <div class="list" id="list"></div>
+  <button class="more" id="more" style="display:none">Afficher plus</button>
+</main>
+<section id="dashView" style="display:none;max-width:1100px;margin:0 auto;padding:12px 16px 60px">
+ <div class="inline" style="justify-content:space-between;margin-bottom:8px"><h2 style="margin:0;font-size:18px">Tableau de bord</h2>
+ <select id="dSect"><option value="">Les deux secteurs</option><option value="86">Secteur 86</option><option value="37">Secteur 37</option></select></div>
+ <div class="kpis" id="dKpis"></div>
+ <div class="dgrid">
+  <div class="panel"><h3 class="ph">Visites par semaine (12 dernières semaines)</h3><div id="dWeeks"></div></div>
+  <div class="panel"><h3 class="ph">Statuts par activité</h3><div id="dActs"></div></div>
+  <div class="panel"><h3 class="ph">Récurrents à visiter</h3><div id="dLate"></div></div>
+  <div class="panel"><h3 class="ph">Clients actifs pas vus depuis le plus longtemps</h3><div id="dOld"></div></div>
+  <div class="panel"><h3 class="ph">Opportunités : clients actifs, activité encore en prospect</h3><div id="dOpp"></div></div>
+  <div class="panel"><h3 class="ph">Fiches à compléter (clients actifs)</h3><div id="dIncomplete"></div></div>
+ </div>
+</section>
+<section id="tourView" style="display:none;max-width:1300px;margin:0 auto;padding:12px 16px 60px">
+ <div class="tgrid">
+  <div class="panel">
+   <div class="inline"><div style="flex:1;min-width:130px"><label for="tDate">Date de la tournée</label><input type="date" id="tDate" style="width:100%"></div>
+   <div style="flex:1;min-width:130px"><label for="tSect">Secteur</label><select id="tSect" style="width:100%"><option value="86">86 (Vienne)</option><option value="37">37 (Indre-et-Loire)</option></select></div></div>
+   <div class="note" id="tSectNote"></div>
+   <div class="inline"><div style="flex:1"><label for="tN">Nombre de visites</label><input type="number" id="tN" min="1" max="25" value="8" style="width:100%"></div>
+   <div style="flex:1"><label for="tR">Rayon autour du 1er client</label><select id="tR" style="width:100%"><option value="10">10 km</option><option value="20">20 km</option><option value="30" selected>30 km</option><option value="50">50 km</option><option value="999">Tout le secteur</option></select></div></div>
+   <label for="tPool">Clients à proposer</label>
+   <select id="tPool" style="width:100%"><option value="actifs">Clients actifs</option><option value="tous">Actifs et prospects</option><option value="prospects">Prospects uniquement</option></select>
+   <label>Point de départ et de retour</label>
+   <div class="inline"><input id="tStart" placeholder="Adresse de départ (facultatif)" style="flex:1;min-width:160px"><button id="tStartSave">OK</button><button id="tGeoMe" title="Utiliser ma position actuelle">📍</button></div>
+   <div class="note" id="tStartNote"></div>
+   <div class="inline" style="margin-top:12px"><button class="primary" id="tBuild">Proposer la tournée</button><button id="tSaveTour" disabled>Enregistrer</button></div>
+   <div class="note" id="tInfo" style="margin-top:8px"></div>
+   <ol class="stops" id="tStops"></ol>
+   <div class="inline" id="tExport" style="margin-top:10px;display:none"></div>
+   <div class="sec" id="tAddBox" style="display:none"><h3>Ajouter un client à la tournée</h3><input type="search" id="tAddQ" placeholder="Nom ou ville…" style="width:100%"><div id="tAddRes"></div></div>
+  </div>
+  <div><div id="map"></div><div class="note" id="mapNote" style="margin-top:6px">Carte : © contributeurs OpenStreetMap. Elle s'affiche quand vous êtes connecté à internet.</div></div>
+ </div>
+</section>
+
+
+<dialog id="dlg"></dialog>
+<dialog id="menu"><div class="dhead"><h2>Sauvegarde des données</h2><button class="x" data-close>✕</button></div>
+<div class="dbody">
+<p class="note">Vos données (fiches, visites, récurrences, notes) sont enregistrées uniquement dans ce navigateur, sur cet appareil. Exportez une sauvegarde régulièrement, et utilisez-la pour transférer vos données vers un autre appareil ou la clé USB.</p>
+<div class="inline"><button class="primary" id="btnExport">Exporter une sauvegarde</button><button id="btnRestore">Restaurer une sauvegarde</button></div>
+<div class="sec"><h3>Synchroniser avec un autre appareil</h3>
+<p class="note">Fusionne les données d’un autre appareil (téléphone, clé USB, version web) avec celles-ci, sans rien écraser : les visites sont réunies et la saisie la plus récente l’emporte. Ensuite, renvoyez le fichier synchronisé vers l’autre appareil.</p>
+<div class="inline"><button class="primary" id="btnSyncIn">1. Synchroniser avec un fichier…</button><button id="btnSyncOut">2. Envoyer le fichier synchronisé</button></div>
+<input type="file" id="syncIn" accept=".json,application/json" hidden></div>
+<div class="sec" id="fileBox"><h3>Fichier de données (clé USB)</h3>
+<p class="note">Avec Chrome ou Edge, reliez le CRM à un fichier sur votre clé USB : chaque modification y est enregistrée automatiquement, et vous retrouvez vos données sur n’importe quel ordinateur en ouvrant ce fichier.</p>
+<div class="inline"><button id="btnLinkNew">Créer un fichier de données…</button><button id="btnOpenFile">Ouvrir un fichier de données…</button><button id="btnResume" style="display:none">Reprendre</button></div>
+<div class="note" id="fileState"></div></div>
+<div class="sec"><h3>Adresses</h3><button id="btnGeo2">Géocoder les adresses manquantes</button></div>
+<div class="sec"><h3>Zone sensible</h3><button id="btnWipe">Effacer toutes les données de cet appareil</button></div>
+</div></dialog>
+<dialog id="setDlg"><div class="dhead"><h2>Paramètres</h2><button class="x" data-close>✕</button></div>
+<div class="dbody">
+ <div class="sec"><h3>Tournées : secteur de chaque jour</h3><div class="setgrid" id="setDays"></div></div>
+ <div class="sec"><h3>Tournées : valeurs par défaut</h3><div class="setgrid">
+  <div><label for="sVisits">Nombre de visites par jour</label><input type="number" id="sVisits" min="1" max="25"></div>
+  <div><label for="sRadius">Rayon autour du 1er client (km)</label><input type="number" id="sRadius" min="5" max="999"></div>
+  <div><label for="sPool">Clients proposés</label><select id="sPool"><option value="actifs">Clients actifs</option><option value="tous">Actifs et prospects</option><option value="prospects">Prospects uniquement</option></select></div>
+ </div><div class="note">L’adresse de départ se règle dans l’onglet Tournée.</div></div>
+ <div class="sec"><h3>Priorités</h3><div class="setgrid">
+  <div><label for="sOld">« Pas vu depuis longtemps » à partir de (jours)</label><input type="number" id="sOld" min="7" max="365"></div>
+  <div><label for="sSoon">Récurrents : « à visiter » quand la visite est due sous (jours)</label><input type="number" id="sSoon" min="0" max="30"></div>
+  <div><label for="sInM">Sans commande depuis (mois) : passe Inactif</label><input type="number" id="sInM" min="1" max="60"></div>
+  <div><label for="sLoM">Sans commande depuis (mois) : passe Inactif Perdu</label><input type="number" id="sLoM" min="1" max="120"></div>
+ </div></div>
+ <div class="sec"><h3>Mise en page</h3><div class="setgrid">
+  <div><label for="sTitle">Nom de l’application</label><input id="sTitle" maxlength="40"></div>
+  <div><label for="sIni">Initiales des commentaires de visite</label><input id="sIni" maxlength="6"></div>
+  <div><label for="sTheme">Thème</label><select id="sTheme"><option value="auto">Automatique (selon l’appareil)</option><option value="light">Clair</option><option value="dark">Sombre</option></select></div>
+  <div><label for="sAccent">Couleur principale</label><select id="sAccent"><option value="#1f6feb">Bleu</option><option value="#0f7b6c">Vert sapin</option><option value="#b5471b">Orange brique</option><option value="#7a3db8">Violet</option><option value="#1c2330">Anthracite</option><option value="#c4161c">Rouge</option></select></div>
+  <div><label for="sStart">Onglet à l’ouverture</label><select id="sStart"><option value="clients">Clients</option><option value="tour">Tournée</option><option value="dash">Pilotage</option></select></div>
+  <div><label for="sSort">Tri par défaut de la liste</label><select id="sSort"><option value="prio">Priorité</option><option value="name">Nom</option><option value="ville">Ville</option><option value="last">Dernière visite</option></select></div>
+  <div class="checks" style="align-self:end"><label><input type="checkbox" id="sCompact" style="width:auto"> Affichage compact</label></div>
+ </div></div>
+ <div class="sec"><h3>Informations affichées dans la liste des clients</h3><div class="checks setgrid" id="setFields"></div></div>
+ <div class="inline"><button class="primary" id="setSave">Enregistrer</button><button id="setReset">Valeurs par défaut</button></div>
+</div></dialog>
+<dialog id="newDlg"><div class="dhead"><h2 id="newTitle">Nouveau client</h2><button class="x" data-close>✕</button></div>
+<form class="dbody" id="newForm" autocomplete="off">
+ <div class="setgrid">
+  <div style="grid-column:1/-1"><label>Statut par métier</label><div class="setgrid" id="nActs"></div></div>
+  <div style="grid-column:1/-1"><label for="nName">Raison sociale *</label><input id="nName" required></div>
+  <div style="grid-column:1/-1"><label for="nDen">Enseigne / dénomination</label><input id="nDen"></div>
+  <div style="grid-column:1/-1"><label for="nVoie">Adresse</label><input id="nVoie"></div>
+  <div><label for="nCP">Code postal *</label><input id="nCP" required pattern="[0-9]{5}" inputmode="numeric" maxlength="5"></div>
+  <div><label for="nVille">Ville *</label><input id="nVille" required></div>
+  <div><label for="nContact">Contact principal</label><input id="nContact"></div>
+  <div><label for="nEmail">E-mail</label><input id="nEmail" type="email"></div>
+  <div><label for="nRdv">RDV obligatoire</label><select id="nRdv"><option>NON</option><option>OUI</option></select></div>
+  <div><label for="nRec">Récurrence de visite</label><div class="inline" style="flex-wrap:nowrap"><input type="number" id="nRecN" min="0" max="52" placeholder="—" style="width:70px"><select id="nRecU"><option value="semaine">semaine(s)</option><option value="mois">mois</option></select></div></div>
+  <div style="grid-column:1/-1"><label for="nCom">Commentaire de tournée</label><textarea id="nCom" rows="2" style="width:100%"></textarea></div>
+ </div>
+ <div class="inline" style="margin-top:14px"><button class="primary" type="submit" id="nSave">Créer le client</button><button type="button" data-close>Annuler</button></div>
+</form></dialog>
+<div class="toast" id="toast"></div>
+
+<script>/*XLSX*/</script>
+<script>/*LEAFLET*/</script>
+<script>
+"use strict";
+// ---------- Stockage (IndexedDB) ----------
+const DB={db:null,
+  open(){return new Promise((ok,ko)=>{const r=indexedDB.open('crm-tournees',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('clients',{keyPath:'id'});d.createObjectStore('meta')};r.onsuccess=()=>{this.db=r.result;ok()};r.onerror=()=>ko(r.error)})},
+  all(){return new Promise((ok,ko)=>{const r=this.db.transaction('clients').objectStore('clients').getAll();r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error)})},
+  put(list){return new Promise((ok,ko)=>{const t=this.db.transaction('clients','readwrite');const s=t.objectStore('clients');list.forEach(c=>s.put(c));t.oncomplete=()=>{dataChanged();ok()};t.onerror=()=>ko(t.error)})},
+  clear(){return new Promise((ok,ko)=>{const t=this.db.transaction(['clients','meta'],'readwrite');t.objectStore('clients').clear();t.objectStore('meta').clear();t.oncomplete=ok;t.onerror=()=>ko(t.error)})},
+  getMeta(k){return new Promise(ok=>{const r=this.db.transaction('meta').objectStore('meta').get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})},
+  setMeta(k,v){return new Promise(ok=>{const t=this.db.transaction('meta','readwrite');t.objectStore('meta').put(v,k);t.oncomplete=()=>{if(!/^(dataFile|lastBackup)$/.test(k))dataChanged();ok()}})},
+  metaAll(){return new Promise(ok=>{const st=this.db.transaction('meta').objectStore('meta');const out={};const r=st.openCursor();r.onsuccess=()=>{const c=r.result;if(c){out[c.key]=c.value;c.continue()}else ok(out)};r.onerror=()=>ok(out)})}
+};
+
+// ---------- Champs du fichier source ----------
+const FIELDS=['Code','RaisonSociale','ClientDenomination','MetierClient','NomVille','CodePostal','Voie1','Commercial','EstActif','StatutDID','StatutDIND','StatutHuile','StatutHydro','RDVObligatoire','ContrainteCalendaire','ContactPrincipal','EmailContactPrincipal','CommentaireChauffeur','CommentaireTournee','GeoCodage','ProtocoleSecurite','PlanPrevention','DateCreation','Segment','Priorite'];
+const ACTS={Huile:'StatutHuile',DID:'StatutDID',DIND:'StatutDIND',Hydro:'StatutHydro'};
+const STATUTS=['Actif','Inactif','Inactif Perdu','Perdu','Prospect','N/A'];
+function normStatus(v){const n=norm(v);if(!n)return 'N/A';if(n.includes('prospect'))return 'Prospect';if(n==='n a'||n==='na'||n.includes('sans objet'))return 'N/A';
+  if(n.includes('perdu')&&n.includes('inactif'))return 'Inactif Perdu';if(n.includes('perdu'))return 'Perdu';if(n.includes('inactif'))return 'Inactif';if(n.includes('actif'))return 'Actif';return String(v)}
+const isActif=c=>Object.values(ACTS).some(f=>c[f]==='Actif');
+function addMonths(isoD,m){const d=parseD(isoD);d.setMonth(d.getMonth()+m);return d}
+// Règle : sans commande depuis N mois, un métier Actif passe Inactif ; au-delà de M mois, Inactif Perdu.
+// Référence par métier = la plus récente entre dernière commande, dernière prestation du métier et dernier choix manuel.
+function autoStatus(c){let changed=false;c.autoNote=c.autoNote||{};
+  for(const [k,f] of Object.entries(ACTS)){const ref=[c.dates?.order,c.dates?.[k],c.manualAt?.[f]].filter(Boolean).sort().at(-1);delete c.autoNote[f];
+    if(!c.dates?.order&&!c.dates?.[k])continue;const t=today();let to=null;
+    if((c[f]==='Actif'||c[f]==='Inactif')&&addMonths(ref,CFG.lostMonths)<t)to='Inactif Perdu';
+    else if(c[f]==='Actif'&&addMonths(ref,CFG.inactiveMonths)<t)to='Inactif';
+    if(to){c[f]=to;changed=true}
+    if(to||(c[f]==='Inactif'||c[f]==='Inactif Perdu')&&ref&&addMonths(ref,CFG.inactiveMonths)<t)c.autoNote[f]=`aucune commande depuis le ${fmtD(ref)}`}
+  const a=isActif(c);if(a!==c.EstActif){c.EstActif=a;changed=true}
+  return changed}
+const norm=s=>String(s??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+const clean=v=>{if(v==null)return '';if(v instanceof Date)return v.toISOString().slice(0,10);return String(v).replace(/_x000D_/g,'').replace(/\r/g,'').replace(/\n{3,}/g,'\n\n').trim()};
+const truthy=v=>/^(true|vrai|oui|1|yes|x)$/i.test(String(v).trim());
+const sector=c=>String(c.CodePostal||'').padStart(5,'0').slice(0,2);
+const addrKey=c=>norm(c.Voie1)+'|'+String(c.CodePostal||'').trim();
+
+let clients=[];
+const DEFAULTS={days:{1:'86',2:'37',3:'86',4:'37',5:''},visits:8,radius:30,pool:'actifs',oldDays:60,soonDays:7,title:'CRM Tournées',theme:'auto',accent:'#1f6feb',startTab:'clients',sort:'prio',compact:false,initials:'FNG',inactiveMonths:10,lostMonths:18,
+  fields:{address:true,activities:true,rec:true,lastVisit:true,sector:true,contact:false,phoneComment:false,segment:false,lastOrder:false,lastPresta:false}};
+const FIELD_LABELS={address:'Adresse',activities:'Activités clientes (Huile, DID…)',rec:'Récurrence',lastVisit:'Date de dernière visite',sector:'Secteur',contact:'Contact principal',phoneComment:'Commentaire de tournée',segment:'Segment',lastOrder:'Date de dernière commande',lastPresta:'Dernières prestations par métier'};
+let CFG=JSON.parse(JSON.stringify(DEFAULTS));
+const dname=c=>(!c.RaisonSociale||/^\[?nd\]?$/i.test(c.RaisonSociale.trim()))?(c.ClientDenomination||c.RaisonSociale||c.Code):c.RaisonSociale;
+
+// ---------- Dates & priorité ----------
+const DAY=864e5;
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const parseD=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fmtD=s=>s?parseD(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}):'';
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const todayIso=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const visitPrefix=iso=>{const [y,m,d]=iso.split('-');return `${d}${m}${y.slice(2)}-${CFG.initials} : `};
+const stripPrefix=t=>{let x=String(t||'');let prev;do{prev=x;x=x.replace(/^\s*\d{6}\s*-\s*[A-Za-z]{1,6}\s*:?\s*/,'')}while(x!==prev);return x.trim()};
+const withPrefix=(iso,t)=>{let body=stripPrefix(t);if(!body&&iso<todayIso())body='Visite saisie a posteriori';return visitPrefix(iso)+body};
+const lastVisit=c=>(c.visits&&c.visits.length)?c.visits.map(v=>v.date).sort().at(-1):null;
+function addPeriod(s,rec){const d=parseD(s);if(rec.unit==='mois')d.setMonth(d.getMonth()+rec.every);else d.setDate(d.getDate()+7*rec.every);return d}
+// rang 0 : récurrent échu ou à moins de 7 jours ; 1 : déjà visité (plus ancien d'abord) ; 2 : récurrent à jour ; 3 : jamais visité
+function prio(c){
+  const last=lastVisit(c),t=today();
+  if(c.rec&&c.rec.every>0){
+    const due=last?addPeriod(last,c.rec):t;const delta=Math.round((due-t)/DAY);
+    if(delta<0)return{rank:0,key:delta,label:`En retard de ${-delta} j`,cls:'b-red',due};
+    if(delta<=CFG.soonDays)return{rank:0,key:delta,label:delta===0?'À visiter aujourd’hui':`À visiter sous ${delta} j`,cls:'b-amber',due};
+    return{rank:2,key:delta,label:`Prochaine visite le ${due.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}`,cls:'b-green',due};
+  }
+  if(last){const n=Math.round((t-parseD(last))/DAY);return{rank:1,key:-n,label:n<0?`Visite prévue le ${fmtD(last)}`:n===0?'Vu aujourd\u2019hui':`Vu il y a ${n} j`,cls:n>=CFG.oldDays?'b-amber':'',days:n}}
+  return{rank:3,key:0,label:'Jamais visité',cls:''};
+}
+const recLabel=r=>r&&r.every>0?`Tous les ${r.every>1?r.every+' ':''}${r.unit==='mois'?'mois':(r.every>1?'semaines':'semaine')}`:'';
+
+// ---------- Import ----------
+async function readFile(file){
+  const buf=await file.arrayBuffer();
+  if(/\.csv$/i.test(file.name)){
+    let txt=new TextDecoder('utf-8').decode(buf);
+    if(txt.includes('�'))txt=new TextDecoder('windows-1252').decode(buf);
+    const first=txt.split(/\r?\n/)[0];const FS=(first.split(';').length>first.split(',').length)?';':',';
+    return XLSX.read(txt,{type:'string',FS,cellDates:true,raw:true});
+  }
+  return XLSX.read(buf,{type:'array',cellDates:true});
+}
+function pickSheet(wb){
+  const ok=n=>{const rows=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,range:0,blankrows:false});const h=(rows[0]||[]).map(norm);return h.includes('code')&&h.includes('raisonsociale')};
+  const named=wb.SheetNames.find(n=>/portefeuille/i.test(n)&&ok(n));
+  return named||wb.SheetNames.find(ok);
+}
+// Colonnes de dates reconnues à l'import : « date dernière commande », « dernière prestation Huile/DID/DIND/Hydro »…
+function dateCol(k){const n=norm(k).replace(/ /g,'');
+  if(n.includes('commande'))return 'order';
+  if(n.includes('presta')||n.includes('intervention')){if(n.includes('dind'))return 'DIND';if(n.includes('did'))return 'DID';if(n.includes('huile'))return 'Huile';if(n.includes('hydro'))return 'Hydro'}
+  return null}
+function toIso(v){if(v==null||v==='')return '';if(v instanceof Date&&!isNaN(v))return iso(v);
+  if(typeof v==='number'&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*864e5));return d.toISOString().slice(0,10)}
+  const m=String(v).trim().match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`}
+  const m2=String(v).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);return m2?m2[0]:''}
+const maxIso=(a,b)=>!a?b||'':!b?a:(a>b?a:b);
+function rowsFrom(wb){
+  const name=pickSheet(wb);if(!name)throw new Error('Aucune feuille ne contient les colonnes « Code » et « RaisonSociale ».');
+  const raw=XLSX.utils.sheet_to_json(wb.Sheets[name],{defval:'',raw:true});
+  const map={},dmap={};if(raw.length)Object.keys(raw[0]).forEach(k=>{const f=FIELDS.find(f=>norm(f)===norm(k));if(f)map[k]=f;else{const d=dateCol(k);if(d)dmap[k]=d}});
+  return{name,dateCols:Object.values(dmap),rows:raw.map(r=>{const o={};for(const k in map)o[map[k]]=clean(r[k]);const dt={};for(const k in dmap){const v=toIso(r[k]);if(v)dt[dmap[k]]=v}if(Object.keys(dt).length)o._dates=dt;return o}).filter(o=>o.Code)};
+}
+async function importFile(file){
+  const wb=await readFile(file);const {name,rows}=rowsFrom(wb);
+  // Fusion des lignes identiques (même code et même adresse) : on garde la plus récente
+  const byId=new Map();let merged=0;
+  for(const r of rows){const id=r.Code+'|'+addrKey(r);const prev=byId.get(id);
+    if(prev){merged++;{const dd={...(prev._dates||{})};for(const k in (r._dates||{}))dd[k]=maxIso(dd[k],r._dates[k]);if((r.DateCreation||'')>=(prev.DateCreation||''))byId.set(id,{...prev,...Object.fromEntries(Object.entries(r).filter(([,v])=>v!=='')),_dates:dd});else prev._dates=dd}}
+    else byId.set(id,r)}
+  const existing=new Map(clients.map(c=>[c.id,c]));const now=new Date().toISOString();
+  let added=0,updated=0;const seen=new Set();const out=[];
+  for(const [id,r] of byId){seen.add(id);const old=existing.get(id);
+    const {_dates,...rest}=r;const src={...rest};Object.values(ACTS).forEach(f=>src[f]=normStatus(r[f]));
+    const fileStatus={};Object.values(ACTS).forEach(f=>{fileStatus[f]=src[f];if(old&&old.fileStatus&&old.fileStatus[f]===src[f]&&old[f])src[f]=old[f]});src.fileStatus=fileStatus;
+    const mergeDates=(cur)=>{const d={...(cur||{})};for(const k in (_dates||{}))d[k]=maxIso(d[k],_dates[k]);return d};
+    if(old){updated++;out.push({...old,...src,dates:mergeDates(old.dates),inLastImport:true,importedAt:now})}
+    else{added++;out.push({id,...src,dates:mergeDates(null),visits:[],rec:null,noteLog:[],lat:null,lon:null,geoScore:null,inLastImport:true,createdAt:now,updatedAt:now,importedAt:now})}}
+  let missing=0;for(const c of clients)if(!seen.has(c.id)&&!c.manual){missing++;if(c.inLastImport!==false){c.inLastImport=false;out.push(c)}}
+  out.forEach(c=>{if(c.inLastImport)autoStatus(c)});
+  await DB.put(out);clients=await DB.all();
+  await DB.setMeta('lastImport',{file:file.name,sheet:name,at:now});
+  return{added,updated,merged,missing,sheet:name};
+}
+
+// ---------- Géocodage (Base Adresse Nationale) ----------
+const GEO_URLS=['https://data.geopf.fr/geocodage/search','https://api-adresse.data.gouv.fr/search/'];
+async function geoQuery(base,q,params){
+  const r=await fetch(`${base}?q=${encodeURIComponent(q)}&limit=1${params}`);
+  if(r.status===429){await new Promise(s=>setTimeout(s,1500));throw new Error('429')}
+  if(r.status>=500)throw new Error(String(r.status));
+  if(!r.ok)return null;return(await r.json()).features?.[0]||null}
+async function geocodeOne(c){
+  const cp=String(c.CodePostal||'').padStart(5,'0'),dep=cp.slice(0,2);
+  const cedex=/\bCEDEX\b/i.test(c.NomVille||'');const ville=(c.NomVille||'').replace(/\bCEDEX\b.*$/i,'').trim();
+  const voie=(c.Voie1||'').replace(/^[\s_\-.]+$/,'').trim();
+  const pc=cedex?'':`&postcode=${cp}`;const sameDep=f=>f&&String(f.properties.postcode||f.properties.citycode||'').startsWith(dep);
+  for(const base of GEO_URLS){
+    try{
+      if(voie){const f=await geoQuery(base,`${voie} ${cedex?'':cp} ${ville}`.replace(/\s+/g,' '),pc);
+        if(f&&f.properties.score>=0.4&&sameDep(f)){c.lat=f.geometry.coordinates[1];c.lon=f.geometry.coordinates[0];c.geoScore=f.properties.score;c.geoLabel=f.properties.label;return true}}
+      // adresse introuvable : on place le client au centre de sa commune
+      const g=await geoQuery(base,ville,'&type=municipality'+pc);
+      if(g&&sameDep(g)){c.lat=g.geometry.coordinates[1];c.lon=g.geometry.coordinates[0];c.geoScore=0.3;c.geoLabel='Centre de '+g.properties.label}else c.geoScore=0;
+      return true}catch(e){}
+  }
+  return false;
+}
+let geoRunning=false;
+async function geocodeAll(){
+  if(geoRunning)return;const todo=clients.filter(c=>c.lat==null&&c.inLastImport!==false);
+  if(!todo.length){toast('Toutes les adresses sont déjà géocodées.');return}
+  if(!navigator.onLine){toast('Pas de connexion internet : le géocodage nécessite d’être en ligne.');return}
+  geoRunning=true;$('#btnGeo').disabled=true;$('#geoBox').style.display='';
+  let done=0,fail=0;const batch=[];
+  const step=async c=>{const ok=await geocodeOne(c);if(!ok)fail++;else batch.push(c);done++;
+    $('#geoTxt').textContent=`Géocodage des adresses : ${done} / ${todo.length}`;$('#geoBar').style.width=(100*done/todo.length)+'%';
+    if(batch.length>=50)await DB.put(batch.splice(0))};
+  for(let i=0;i<todo.length;i+=8){await Promise.all(todo.slice(i,i+8).map(step));await new Promise(s=>setTimeout(s,250));if(fail>20&&fail===done)break}
+  await DB.put(batch);geoRunning=false;$('#btnGeo').disabled=false;$('#geoBox').style.display='none';
+  const low=clients.filter(c=>c.geoScore!=null&&c.geoScore<0.5).length;
+  toast(fail===done?'Le service de géocodage ne répond pas. Réessayez plus tard.':`Géocodage terminé. ${low} adresse(s) peu sûre(s) à vérifier.`);render();
+}
+
+// ---------- Affichage ----------
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let shown=100;
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display='none',4000)}
+function fillSelect(sel,values,label){const cur=sel.value;sel.innerHTML=`<option value="">${label}</option>`+values.map(v=>`<option>${esc(v)}</option>`).join('');sel.value=cur}
+function refreshOptions(){
+  fillSelect($('#fVille'),[...new Set(clients.map(c=>c.NomVille).filter(Boolean))].sort(),'Toutes villes');
+  fillSelect($('#fSeg'),[...new Set(clients.map(c=>c.Segment).filter(Boolean))].sort(),'Tous segments');
+}
+function filtered(){
+  const q=norm($('#q').value),s=$('#fSect').value,a=$('#fActif').value,p=$('#fPrio').value,act=$('#fAct').value,st=$('#fStat').value,v=$('#fVille').value,seg=$('#fSeg').value;
+  let r=clients.filter(c=>c.inLastImport!==false);
+  if(q)r=r.filter(c=>norm([c.Code,c.RaisonSociale,c.ClientDenomination,c.NomVille,c.ContactPrincipal,c.Voie1,c.CodePostal,...(c.noteLog||[]).map(n=>n.text)].join(' ')).includes(q));
+  if(s)r=r.filter(c=>sector(c)===s);
+  if(a)r=r.filter(c=>!!c.EstActif===(a==='1'));
+  if(v)r=r.filter(c=>c.NomVille===v);
+  if(seg)r=r.filter(c=>c.Segment===seg);
+  if(st)r=r.filter(c=>act?c[ACTS[act]]===st:Object.values(ACTS).some(f=>c[f]===st));
+  const P=new Map(r.map(c=>[c,prio(c)]));
+  if(p==='late')r=r.filter(c=>P.get(c).rank===0);
+  if(p==='rec')r=r.filter(c=>c.rec&&c.rec.every>0);
+  if(p==='old')r=r.filter(c=>P.get(c).days>=CFG.oldDays);
+  if(p==='never')r=r.filter(c=>!lastVisit(c));
+  const so=$('#sort').value,cmp=(x,y)=>String(x).localeCompare(String(y),'fr');
+  if(so==='prio')r.sort((x,y)=>P.get(x).rank-P.get(y).rank||P.get(x).key-P.get(y).key||cmp(dname(x),dname(y)));
+  if(so==='name')r.sort((x,y)=>cmp(dname(x),dname(y)));
+  if(so==='ville')r.sort((x,y)=>cmp(x.NomVille,y.NomVille)||cmp(dname(x),dname(y)));
+  if(so==='last')r.sort((x,y)=>cmp(lastVisit(y)||'',lastVisit(x)||''));
+  return{r,P};
+}
+function render(){
+  const list=$('#list');
+  const active=clients.filter(c=>c.inLastImport!==false);
+  if(!active.length){list.innerHTML=`<div class="empty"><p><b>Aucun client pour l’instant.</b></p><p>Importez votre fichier Excel (.xlsx) ou CSV pour remplir le CRM.</p><button class="primary" onclick="document.getElementById('fileIn').click()">Importer un fichier</button></div>`;$('#summary').textContent='';$('#more').style.display='none';return}
+  const {r,P}=filtered();
+  const late=active.filter(c=>prio(c).rank===0).length,rec=active.filter(c=>c.rec&&c.rec.every>0).length,geo=active.filter(c=>c.lat!=null).length;
+  $('#summary').innerHTML=`<span><b>${r.length}</b> affiché(s) sur ${active.length}</span><span>${rec} récurrent(s), dont <b>${late}</b> à visiter</span><span>${geo} / ${active.length} géocodé(s)</span>`;
+  list.innerHTML=r.slice(0,shown).map(c=>{const p=P.get(c);const lv=lastVisit(c);
+    const F=CFG.fields;const tags=(F.activities?['Huile','DID','DIND','Hydro'].filter(k=>c[ACTS[k]]==='Actif').map(k=>`<span class="badge b-green">${k}</span>`).join(' '):'')+(F.rec&&c.rec&&c.rec.every?` <span class="badge">${esc(recLabel(c.rec))}</span>`:'')+(F.segment&&c.Segment?` <span class="badge">${esc(c.Segment)}</span>`:'');
+    return `<div class="row" data-id="${esc(c.id)}"><div><div class="name">${esc(dname(c))} ${c.EstActif?'':'<span class="badge">inactif</span>'}</div>
+    ${F.lastOrder&&c.dates?.order?`<div class="sub">Dernière commande : ${fmtD(c.dates.order)}</div>`:''}${F.lastPresta&&c.dates&&Object.keys(ACTS).some(k=>c.dates[k])?`<div class="sub">Prestations : ${Object.keys(ACTS).filter(k=>c.dates[k]).map(k=>k+' '+fmtD(c.dates[k])).join(' · ')}</div>`:''}
+    ${F.address?`<div class="sub">${esc(c.Voie1)} · ${esc(c.CodePostal)} ${esc(c.NomVille)}</div>`:`<div class="sub">${esc(c.NomVille)}</div>`}
+    ${F.contact&&c.ContactPrincipal?`<div class="sub">${esc(c.ContactPrincipal)}</div>`:''}
+    ${F.phoneComment&&c.CommentaireTournee?`<div class="sub">${esc(c.CommentaireTournee.slice(0,100))}</div>`:''}
+    ${tags.trim()?`<div class="sub">${tags}</div>`:''}</div>
+    <div class="right"><span class="badge ${p.cls}">${esc(p.label)}</span>${F.lastVisit&&lv?'<br>Dernière visite : '+fmtD(lv):''}${F.sector?'<br>Secteur '+sector(c):''}</div></div>`}).join('')||'<div class="empty">Aucun client ne correspond à ces filtres.</div>';
+  $('#more').style.display=r.length>shown?'':'none';
+}
+
+// ---------- Fiche client ----------
+let fichePane='visites';
+function openClient(id,opts){
+  if(opts&&opts.focusVisit)fichePane='visites';
+  const c=clients.find(x=>x.id===id);if(!c)return;const d=$('#dlg');const p=prio(c);
+  const kv=(k,v)=>v!==''&&v!=null?`<dt>${k}</dt><dd>${esc(v)}</dd>`:'';
+  const addr=`${c.Voie1||''}, ${c.CodePostal||''} ${c.NomVille||''}`;
+  const maps=c.lat!=null?`https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lon}`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`;
+  const lv=lastVisit(c),od=c.dates?.order,dd=x=>x?Math.round((today()-parseD(x))/DAY):null;
+  const P=k=>`<div class="pane" data-pane="${k}" ${fichePane===k?'':'hidden'}>`;
+  d.innerHTML=`<div class="dhead"><h2>${esc(dname(c))}<div class="note">${esc(c.Code)} · Secteur ${sector(c)} · ${esc(c.NomVille)}${c.ClientDenomination&&c.ClientDenomination!==dname(c)?' · '+esc(c.ClientDenomination):''}</div></h2>${c.manual?`<button id="editClient">Modifier</button>`:''}<button class="x" data-close aria-label="Fermer">✕</button></div>
+  <div class="dbody">
+   <div class="inline">${c.manual?'<span class="badge">Créé dans l\u2019appli</span>':''}<span class="badge ${p.cls}">${esc(p.label)}</span>${c.EstActif?'<span class="badge b-green">Actif</span>':'<span class="badge">Inactif</span>'}${c.rec?.every?`<span class="badge">${esc(recLabel(c.rec))}</span>`:''}${c.RDVObligatoire==='OUI'?'<span class="badge">RDV obligatoire</span>':''}</div>
+   <div class="qact"><a class="btn" href="${maps}" target="_blank" rel="noopener">Carte</a>${c.lat!=null?`<a class="btn" href="https://waze.com/ul?ll=${c.lat},${c.lon}&navigate=yes" target="_blank" rel="noopener">Waze</a>`:''}${c.EmailContactPrincipal?`<a class="btn" href="mailto:${esc(c.EmailContactPrincipal)}">E-mail</a>`:''}${c.ContactPrincipal?`<span class="note">Contact : ${esc(c.ContactPrincipal)}</span>`:''}</div>
+   <div class="kpis fk"><div class="kpi"><div class="l">Dernière visite</div><div class="v2">${lv?fmtD(lv):'—'}</div>${lv?`<div class="l">il y a ${dd(lv)} j</div>`:''}</div>
+     <div class="kpi"><div class="l">Dernière commande</div><div class="v2">${od?fmtD(od):'—'}</div>${od?`<div class="l">il y a ${dd(od)} j</div>`:''}</div>
+     <div class="kpi"><div class="l">Visites / notes</div><div class="v2">${(c.visits||[]).length} / ${(c.noteLog||[]).length}</div></div></div>
+   <div class="stbar">${Object.entries(ACTS).map(([k,f])=>`<div><label for="st_${k}">${k}${c.autoNote?.[f]?` <span class="badge b-amber" title="Statut mis à jour automatiquement : ${esc(c.autoNote[f])}">auto</span>`:''}</label><select id="st_${k}" data-st="${f}" style="border-left:6px solid ${ST_COLORS[c[f]]||'#111111'}">${STATUTS.map(x=>`<option ${c[f]===x?'selected':''}>${x}</option>`).join('')}</select></div>`).join('')}</div>
+   <div class="note">Sans commande depuis ${CFG.inactiveMonths} mois, un métier Actif passe Inactif ; au-delà de ${CFG.lostMonths} mois, Inactif Perdu. Un choix fait ici repart de la date du jour.</div>
+   <nav class="ftabs">${[['visites','Visites ('+(c.visits||[]).length+')'],['notes','Notes ('+(c.noteLog||[]).length+')'],['cmd','Commandes'],['infos','Infos']].map(([k,l])=>`<button data-fp="${k}" class="${fichePane===k?'on':''}">${l}</button>`).join('')}</nav>
+   ${P('visites')}
+   <div class="sec" style="margin-top:4px">
+     <div class="inline"><label for="vDate" class="note">Date de la visite</label><input type="date" id="vDate" value="${todayIso()}" max="${todayIso()}"></div>
+     <label for="vNote" class="note" style="display:block;margin-top:8px">Commentaire de tournée</label>
+     <textarea id="vNote" rows="2" style="width:100%">${esc(visitPrefix(todayIso()))}</textarea>
+     <div class="note">Le commentaire commence toujours par <b>JJMMAA-${esc(CFG.initials)} : </b> suivi de la date de la visite. Ce préfixe est remis automatiquement à l\u2019enregistrement.</div>
+     <div class="inline" style="margin-top:6px"><button class="primary" id="vAdd">Ajouter la visite</button></div>
+     <ul class="visits">${(c.visits||[]).slice().sort((a,b)=>b.date.localeCompare(a.date)).map(v=>`<li><span><b>${fmtD(v.date)}</b>${v.note?' · '+esc(v.note):''}</span><button class="x" data-del="${esc(v.date)}|${esc(v.note||'')}" title="Supprimer">✕</button></li>`).join('')||'<li><span class="note">Aucune visite enregistrée.</span></li>'}</ul>
+   </div>
+   </div>
+   ${P('notes')}
+   <div class="sec" style="margin-top:4px">
+     <textarea id="noteNew" rows="2" style="width:100%" placeholder="Nouvelle note…"></textarea>
+     <div class="inline" style="margin-top:6px"><button class="primary" id="noteAdd">Ajouter la note</button><span class="note">Toutes les notes sont conservées, datées, et ne sont jamais écrasées (ni par un import, ni par une synchronisation).</span></div>
+     <ul class="visits">${(c.noteLog||[]).slice().sort((a,b)=>b.at.localeCompare(a.at)).map(n=>`<li><span><b>${new Date(n.at).toLocaleString('fr-FR',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</b><br><span style="white-space:pre-wrap">${esc(n.text)}</span></span></li>`).join('')||'<li><span class="note">Aucune note.</span></li>'}</ul></div>
+   </div>
+   ${P('cmd')}
+   <div class="sec" style="margin-top:4px"><div class="setgrid" id="cDates">
+     ${[['order','Dernière commande'],...Object.keys(ACTS).map(k=>[k,'Dernière prestation '+k])].map(([k,l])=>{const v=c.dates?.[k]||'';const n=v?Math.round((today()-parseD(v))/DAY):null;
+       return `<div><label for="cd_${k}">${l}${n!=null?` <span class="note">· il y a ${n} j</span>`:''}</label><input type="date" id="cd_${k}" data-dk="${k}" value="${v}" max="${todayIso()}"></div>`}).join('')}
+   </div><div class="note">Modifiable ici ; un import contenant ces dates les met à jour (la plus récente est gardée).</div></div>
+   </div>
+   ${P('infos')}
+   <div class="sec"><h3>Adresse et contact</h3><dl class="kv">
+     <dt>Adresse</dt><dd>${esc(addr)} · <a href="${maps}" target="_blank" rel="noopener">Ouvrir la carte</a>${c.geoScore!=null&&c.geoScore<0.5?' <span class="badge b-amber">position approximative</span>':''}</dd>
+     ${kv('Contact',c.ContactPrincipal)}${c.EmailContactPrincipal?`<dt>E-mail</dt><dd><a href="mailto:${esc(c.EmailContactPrincipal)}">${esc(c.EmailContactPrincipal)}</a></dd>`:''}
+     ${kv('RDV obligatoire',c.RDVObligatoire)}${kv('Contrainte calendaire',c.ContrainteCalendaire)}
+   </dl></div>
+   <div class="sec"><h3>Récurrence de visite</h3>
+     <div class="inline">Tous les <input type="number" id="rEvery" min="0" max="52" style="width:70px" value="${c.rec?.every||''}" placeholder="—">
+     <select id="rUnit"><option value="semaine" ${c.rec?.unit!=='mois'?'selected':''}>semaine(s)</option><option value="mois" ${c.rec?.unit==='mois'?'selected':''}>mois</option></select>
+     <button id="rSave">Enregistrer</button></div>
+     <div class="note">Laissez vide pour un client sans récurrence. Les clients récurrents passent en tête quand leur visite est due.${p.due?' Prochaine visite prévue le '+p.due.toLocaleDateString('fr-FR')+'.':''}</div>
+   </div>
+   <div class="sec"><h3>Commentaires</h3><dl class="kv">${kv('Tournée',c.CommentaireTournee)}${kv('Chauffeur',c.CommentaireChauffeur)}${kv('Protocole sécurité',c.ProtocoleSecurite)}${kv('Plan de prévention',c.PlanPrevention)}${kv('Créé le',c.DateCreation)}${kv('Commercial',c.Commercial)}</dl></div>
+   <dl class="kv">${kv('Priorité (fichier)',c.Priorite)}${kv('Segment',c.Segment)}</dl>
+   </div>
+  </div>`;
+  d.querySelectorAll('[data-fp]').forEach(b=>b.onclick=()=>{fichePane=b.dataset.fp;d.querySelectorAll('[data-fp]').forEach(x=>x.classList.toggle('on',x===b));d.querySelectorAll('[data-pane]').forEach(x=>x.hidden=x.dataset.pane!==fichePane)});
+  const save=async()=>{c.updatedAt=new Date().toISOString();await DB.put([c]);render();if($('#dashView').style.display!=='none')renderDash();if($('#tourView').style.display!=='none')renderTour()};
+  const vD=d.querySelector('#vDate'),vN=d.querySelector('#vNote');
+  vD.onchange=()=>{if(vD.value)vN.value=visitPrefix(vD.value)+stripPrefix(vN.value)};
+  d.querySelector('#vAdd').onclick=async()=>{const date=vD.value||todayIso();(c.visits=c.visits||[]).push({date,note:withPrefix(date,vN.value)});await save();openClient(id);toast('Visite enregistrée.')};
+  if(opts&&opts.focusVisit){setTimeout(()=>{vN.scrollIntoView({block:'center'});vN.focus();vN.setSelectionRange(vN.value.length,vN.value.length)},50)}
+  d.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const [date,note]=b.dataset.del.split('|');const i=c.visits.findIndex(v=>v.date===date&&(v.note||'')===note);if(i>=0)c.visits.splice(i,1);await save();openClient(id)});
+  d.querySelector('#rSave').onclick=async()=>{const n=parseInt(d.querySelector('#rEvery').value,10);c.rec=n>0?{every:n,unit:d.querySelector('#rUnit').value}:null;(c.fieldAt=c.fieldAt||{}).rec=new Date().toISOString();await save();openClient(id);toast(c.rec?'Récurrence enregistrée : '+recLabel(c.rec).toLowerCase()+'.':'Récurrence retirée.')};
+  d.querySelectorAll('[data-dk]').forEach(inp=>inp.onchange=async()=>{c.dates=c.dates||{};if(inp.value)c.dates[inp.dataset.dk]=inp.value;else delete c.dates[inp.dataset.dk];autoStatus(c);await save();openClient(id)});
+  d.querySelectorAll('[data-st]').forEach(sel=>sel.onchange=async()=>{const f=sel.dataset.st;c[f]=sel.value;(c.manualAt=c.manualAt||{})[f]=todayIso();autoStatus(c);await save();openClient(id);toast('Statut enregistré.')});
+  d.querySelector('#editClient')?.addEventListener('click',()=>{d.close();openClientForm(c)});
+  d.querySelector('#noteAdd').onclick=async()=>{const t=d.querySelector('#noteNew').value.trim();if(!t)return;(c.noteLog=c.noteLog||[]).push({at:new Date().toISOString(),text:t});await save();openClient(id);toast('Note ajoutée.')};
+  if(!d.open)d.showModal();
+}
+
+// ---------- Sauvegarde ----------
+async function snapshot(){const m=await DB.metaAll();const meta={};for(const k in m)if(k.startsWith('tour:')||k==='start'||k==='lastImport'||k==='settings')meta[k]=m[k];
+  return JSON.stringify({app:'crm-tournees',version:2,exportedAt:new Date().toISOString(),clients,meta})}
+async function loadSnapshot(j){await DB.clear();await DB.put(j.clients);for(const k in (j.meta||{}))await DB.setMeta(k,j.meta[k]);clients=await DB.all();await loadSettings();refreshOptions();render();try{await initTour()}catch(e){}}
+async function exportBackup(){
+  const blob=new Blob([await snapshot()],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`crm-sauvegarde-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  await DB.setMeta('lastBackup',new Date().toISOString());
+}
+async function restoreBackup(file){
+  const j=JSON.parse(await file.text());if(j.app!=='crm-tournees'||!Array.isArray(j.clients))throw new Error('Ce fichier n’est pas une sauvegarde du CRM.');
+  if(!confirm(`Remplacer les données de cet appareil par la sauvegarde du ${new Date(j.exportedAt).toLocaleString('fr-FR')} (${j.clients.length} clients) ?`))return;
+  await loadSnapshot(j);toast('Sauvegarde restaurée.');
+}
+
+// ---------- Synchronisation (fusion de deux jeux de données) ----------
+// Données du fichier source : la version importée le plus récemment l'emporte.
+// Saisies personnelles (notes, récurrence, fiche créée dans l'appli) : la plus récemment modifiée l'emporte.
+// Visites : réunies. Dates de commande/prestation : la plus récente. Statuts : le dernier choix manuel, sinon le fichier le plus récent.
+const USER_KEYS=['rec'];
+// Anciennes notes (un seul champ texte) : converties en première note datée de l'historique
+function migrateNotes(c){if(!c)return c;if(c.notes&&String(c.notes).trim()){const at=c.fieldAt?.notes||c.updatedAt||new Date().toISOString();c.noteLog=c.noteLog||[];if(!c.noteLog.some(n=>n.text===c.notes.trim()))c.noteLog.push({at,text:c.notes.trim()});c.notes=''}return c}
+function mergeClient(a,b){
+  migrateNotes(a);migrateNotes(b);if(!a)return b;if(!b)return a;
+  const srcNew=(b.importedAt||'')>(a.importedAt||'')?b:a,usrNew=(b.updatedAt||'')>(a.updatedAt||'')?b:a;
+  const m={...srcNew};
+  if(a.manual||b.manual)Object.assign(m,usrNew);
+  m.fieldAt={};USER_KEYS.forEach(k=>{const ta=a.fieldAt?.[k]||'',tb=b.fieldAt?.[k]||'';const w=(ta||tb)?(tb>ta?b:a):usrNew;m[k]=w[k];if(ta||tb)m.fieldAt[k]=maxIso(ta,tb)});
+  {const sn=new Set();m.noteLog=[...(a.noteLog||[]),...(b.noteLog||[])].filter(n=>{const k=n.at+'|'+n.text;if(sn.has(k))return false;sn.add(k);return true})}
+  const seen=new Set();m.visits=[...(a.visits||[]),...(b.visits||[])].filter(v=>{const k=v.date+'|'+(v.note||'');if(seen.has(k))return false;seen.add(k);return true});
+  m.dates={};for(const k of new Set([...Object.keys(a.dates||{}),...Object.keys(b.dates||{})]))m.dates[k]=maxIso(a.dates?.[k],b.dates?.[k]);
+  m.manualAt={};for(const f of Object.values(ACTS)){const ma=a.manualAt?.[f]||'',mb=b.manualAt?.[f]||'';
+    if(ma||mb){const w=mb>ma?b:a;m[f]=w[f];m.manualAt[f]=maxIso(ma,mb)}else m[f]=srcNew[f]}
+  if(m.lat==null){const g=a.lat!=null?a:b.lat!=null?b:null;if(g){m.lat=g.lat;m.lon=g.lon;m.geoScore=g.geoScore;m.geoLabel=g.geoLabel}}
+  m.updatedAt=maxIso(a.updatedAt,b.updatedAt);m.importedAt=maxIso(a.importedAt,b.importedAt);
+  autoStatus(m);return m}
+const stable=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).filter(([,x])=>x!==undefined).sort(([x],[y])=>x<y?-1:1)):v);
+const sig=c=>{const {createdAt,importedAt,updatedAt,fieldAt,manualAt,autoNote,...r}=c;return stable(r)};
+async function syncFrom(j){
+  if(!j||j.app!=='crm-tournees'||!Array.isArray(j.clients))throw new Error('Ce fichier n\u2019est pas un fichier de données du CRM.');
+  const local=new Map(clients.map(c=>[c.id,c]));const changed=[];let added=0,updated=0;
+  for(const r of j.clients){const l=local.get(r.id);const m=mergeClient(l,r);if(!l){added++;changed.push(m)}else if(stable(m)!==stable(l)){changed.push(m);if(sig(m)!==sig(l))updated++}}
+  const meta=await DB.metaAll();for(const k in (j.meta||{}))if(k.startsWith('tour:')&&!meta[k])await DB.setMeta(k,j.meta[k]);
+  if(changed.length)await DB.put(changed);clients=await DB.all();refreshOptions();render();
+  if($('#tourView').style.display!=='none')renderTour();if($('#dashView').style.display!=='none')renderDash();
+  return{added,updated}}
+async function shareOrDownload(){const txt=await snapshot();const name='crm-donnees.json';const file=new File([txt],name,{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Données CRM'});return}catch(e){if(e.name==='AbortError')return}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+
+// ---------- Fichier de données (clé USB) ----------
+const FS_OK='showSaveFilePicker' in window;let dataFile=null,fileTimer=null,loading=false;
+function dataChanged(){if(!dataFile||loading)return;clearTimeout(fileTimer);fileTimer=setTimeout(writeDataFile,1200)}
+async function writeDataFile(){if(!dataFile)return;try{if(await dataFile.queryPermission({mode:'readwrite'})!=='granted')return showFileState('Cliquez sur « Reprendre » pour autoriser l\u2019enregistrement.');
+  try{const txt=await (await dataFile.getFile()).text();if(txt.trim()){loading=true;try{await syncFrom(JSON.parse(txt))}finally{loading=false}}}catch(e){}
+  const w=await dataFile.createWritable();await w.write(await snapshot());await w.close();showFileState('Enregistré dans '+dataFile.name+' à '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}))}catch(e){showFileState('Échec de l\u2019enregistrement dans le fichier : '+e.message)}}
+function showFileState(m){const el=$('#fileState');if(el)el.textContent=m;$('#btnMenu').textContent=dataFile?'Données : '+dataFile.name:'Sauvegarde'}
+async function linkNewFile(){const h=await window.showSaveFilePicker({suggestedName:'crm-donnees.json',types:[{description:'Données CRM',accept:{'application/json':['.json']}}]});dataFile=h;await DB.setMeta('dataFile',h);await writeDataFile()}
+async function openDataFile(){const [h]=await window.showOpenFilePicker({types:[{description:'Données CRM',accept:{'application/json':['.json']}}]});
+  const j=JSON.parse(await (await h.getFile()).text());if(j.app!=='crm-tournees')throw new Error('Ce fichier n\u2019est pas un fichier de données du CRM.');
+  if(await h.requestPermission({mode:'readwrite'})!=='granted')throw new Error('Autorisation refusée.');
+  let r;loading=true;try{r=await syncFrom(j)}finally{loading=false}dataFile=h;await DB.setMeta('dataFile',h);await writeDataFile();
+  showFileState('Relié à '+h.name+'. Chaque modification y est enregistrée et fusionnée.');toast(`Synchronisé avec ${h.name} : ${r.added} client(s) ajouté(s), ${r.updated} mis à jour.`)}
+async function syncLinkedFile(){if(!dataFile||loading)return;try{if(await dataFile.queryPermission({mode:'readwrite'})!=='granted')return;const txt=await (await dataFile.getFile()).text();if(!txt.trim())return;
+  loading=true;let r;try{r=await syncFrom(JSON.parse(txt))}finally{loading=false}if(r.added||r.updated){toast(`Mis à jour depuis ${dataFile.name} : ${r.added} ajouté(s), ${r.updated} modifié(s).`);await writeDataFile()}}catch(e){}}
+window.addEventListener('focus',()=>syncLinkedFile());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncLinkedFile()});
+async function resumeDataFile(){if(!dataFile)return;if(await dataFile.requestPermission({mode:'readwrite'})==='granted'){await writeDataFile()}}
+
+// ---------- Événements ----------
+$('#btnImport').onclick=()=>$('#fileIn').click();
+$('#fileIn').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{toast('Import en cours…');const r=await importFile(f);refreshOptions();shown=100;render();
+    toast(`Import terminé (feuille « ${r.sheet} ») : ${r.added} nouveau(x), ${r.updated} mis à jour, ${r.merged} doublon(s) fusionné(s)${r.missing?', '+r.missing+' absent(s) du fichier masqué(s)':''}.`);
+    if(clients.some(c=>c.lat==null&&c.geoScore==null&&c.inLastImport!==false)&&navigator.onLine&&confirm('Calculer maintenant la position GPS des nouvelles adresses ? (nécessite internet, quelques minutes)'))geocodeAll();
+  }catch(err){toast('Import impossible : '+err.message)}};
+$('#btnGeo').onclick=geocodeAll;$('#btnGeo2').onclick=()=>{$('#menu').close();geocodeAll()};
+$('#btnMenu').onclick=()=>$('#menu').showModal();
+$('#btnExport').onclick=exportBackup;
+$('#btnLinkNew').onclick=()=>linkNewFile().catch(e=>e.name!=='AbortError'&&toast(e.message));
+$('#btnOpenFile').onclick=()=>openDataFile().catch(e=>e.name!=='AbortError'&&toast(e.message));
+$('#btnSyncIn').onclick=()=>$('#syncIn').click();
+$('#syncIn').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const r=await syncFrom(JSON.parse(await f.text()));toast(`Synchronisation : ${r.added} client(s) ajouté(s), ${r.updated} mis à jour.`);dataChanged()}catch(err){toast(err.message)}};
+$('#btnSyncOut').onclick=()=>shareOrDownload().catch(e=>toast(e.message));
+$('#btnResume').onclick=()=>resumeDataFile().catch(e=>toast(e.message));
+if(!FS_OK)$('#fileBox').innerHTML='<h3>Fichier de données (clé USB)</h3><p class="note">Ce navigateur ne permet pas d\u2019enregistrer directement dans un fichier. Utilisez Chrome ou Edge sur ordinateur, ou les boutons de sauvegarde ci-dessus.</p>';
+$('#btnRestore').onclick=()=>$('#backupIn').click();
+$('#backupIn').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{await restoreBackup(f);$('#menu').close()}catch(err){toast(err.message)}};
+$('#btnWipe').onclick=async()=>{if(confirm('Effacer définitivement toutes les fiches, visites et notes de cet appareil ? Pensez à exporter une sauvegarde avant.')){await DB.clear();clients=[];refreshOptions();render();$('#menu').close()}};
+document.addEventListener('click',e=>{if(e.target.matches('[data-close]'))e.target.closest('dialog').close();const row=e.target.closest('.row');if(row)openClient(row.dataset.id)});
+['q','fSect','fActif','fPrio','fAct','fStat','fVille','fSeg','sort'].forEach(id=>$('#'+id).addEventListener('input',()=>{shown=100;render()}));
+$('#btnFilt').onclick=()=>$('#filters').classList.toggle('open');
+$('#more').onclick=()=>{shown+=100;render()};
+// ---------- Tournées ----------
+const sectByDay=d=>CFG.days[d]||'';
+const DAYS=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const km=(a,b)=>{const R=6371,r=Math.PI/180,dl=(b.lat-a.lat)*r,dn=(b.lon-a.lon)*r;const h=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+let tour={stops:[],start:null,saved:false},map=null,layer=null;
+function nextWorkday(){const d=today();for(let i=0;i<7&&!sectByDay(d.getDay());i++)d.setDate(d.getDate()+1);return d}
+function syncSector(){const d=parseD($('#tDate').value);const s=sectByDay(d.getDay());
+  if(s){$('#tSect').value=s;$('#tSectNote').textContent=`Le ${DAYS[d.getDay()]}, secteur ${s}.`}else $('#tSectNote').textContent=`Le ${DAYS[d.getDay()]} n'a pas de secteur attribué : choisissez-en un.`}
+function poolFilter(c){const v=$('#tPool').value;const prospect=Object.values(ACTS).some(f=>c[f]==='Prospect')&&!Object.values(ACTS).some(f=>c[f]==='Actif');
+  if(v==='actifs')return !!c.EstActif;if(v==='prospects')return prospect;return true}
+function candidates(){const s=$('#tSect').value;return clients.filter(c=>c.inLastImport!==false&&sector(c)===s&&c.lat!=null&&poolFilter(c))}
+const prioCmp=(a,b)=>{const p=prio(a),q=prio(b);return p.rank-q.rank||p.key-q.key};
+// ordre de passage : plus proche voisin puis amélioration 2-opt
+function orderStops(st,start){
+  if(st.length<3&&!start)return st;
+  const pts=start?[start,...st]:[...st];const n=pts.length;const D=pts.map(a=>pts.map(b=>km(a,b)));
+  let route=[0],left=new Set([...Array(n).keys()].slice(1));
+  while(left.size){const last=route.at(-1);let best=null;for(const j of left)if(best==null||D[last][j]<D[last][best])best=j;route.push(best);left.delete(best)}
+  const loop=!!start;const cost=r=>{let s=0;for(let i=0;i<r.length-1;i++)s+=D[r[i]][r[i+1]];return loop?s+D[r.at(-1)][r[0]]:s};
+  let improved=true;while(improved){improved=false;for(let i=1;i<n-1;i++)for(let k=i+1;k<n;k++){const r=[...route.slice(0,i),...route.slice(i,k+1).reverse(),...route.slice(k+1)];if(cost(r)<cost(route)-1e-9){route=r;improved=true}}}
+  return(start?route.slice(1).map(i=>pts[i]):route.map(i=>pts[i]));
+}
+function routeKm(st){const pts=tour.start?[tour.start,...st,tour.start]:st;let s=0;for(let i=0;i<pts.length-1;i++)s+=km(pts[i],pts[i+1]);return s*1.3}
+function buildTour(){
+  const pool=candidates().sort(prioCmp);const n=Math.max(1,+$('#tN').value||8),R=+$('#tR').value;
+  if(!pool.length){tour.stops=[];renderTour(`Aucun client géocodé pour ce secteur avec ces critères.${clients.some(c=>c.lat==null)?' Pensez à lancer le géocodage.':''}`);return}
+  const anchor=pool[0];const near=pool.filter(c=>km(anchor,c)<=R);
+  const chosen=near.slice(0,n);
+  tour.stops=orderStops(chosen,tour.start).map(c=>c.id);tour.saved=false;
+  renderTour(near.length<n?`Seulement ${near.length} client(s) dans un rayon de ${R} km autour du client le plus prioritaire. Augmentez le rayon pour en ajouter.`:'');
+}
+function stopObjs(){return tour.stops.map(id=>clients.find(c=>c.id===id)).filter(Boolean)}
+function renderTour(msg){
+  const st=stopObjs();const date=$('#tDate').value;
+  $('#tInfo').innerHTML=st.length?`<b>${st.length} visite(s)</b> · environ ${Math.round(routeKm(st))} km${tour.start?' (aller-retour)':''}${tour.saved?' · <span class="badge b-green">enregistrée</span>':''}${msg?'<br>'+esc(msg):''}`:esc(msg||'');
+  $('#tStops').innerHTML=st.map((c,i)=>{const p=prio(c);const done=(c.visits||[]).some(v=>v.date===date||v.date===todayIso());
+    return `<li class="${done?'done':''}"><span class="num">${done?'✓':i+1}</span><div><b class="open" data-id="${esc(c.id)}" style="cursor:pointer">${esc(dname(c))}</b><div class="note">${esc(c.Voie1)}, ${esc(c.NomVille)}</div><span class="badge ${p.cls}">${esc(p.label)}</span>${c.RDVObligatoire==='OUI'?' <span class="badge">RDV</span>':''}${c.CommentaireTournee?`<div class="note">${esc(c.CommentaireTournee.slice(0,120))}</div>`:''}</div>
+    <div class="acts">${i>0?`<button data-up="${i}" title="Monter">↑</button>`:''}<button data-rm="${i}" title="Retirer">✕</button>${done?'':`<button data-visit="${i}">Visité</button>`}<a class="btn" href="https://waze.com/ul?ll=${c.lat},${c.lon}&navigate=yes" target="_blank" rel="noopener">Waze</a></div></li>`}).join('');
+  $('#tSaveTour').disabled=!st.length;$('#tAddBox').style.display=st.length?'':'none';
+  const ex=$('#tExport');ex.style.display=st.length?'':'none';
+  if(st.length){const pts=st.map(c=>`${c.lat},${c.lon}`);const links=[];const o=tour.start?`${tour.start.lat},${tour.start.lon}`:null;
+    // Google Maps accepte 9 étapes intermédiaires par lien : on découpe si besoin
+    const all=o?[o,...pts,o]:pts;for(let i=0;i<all.length-1;i+=10){const seg=all.slice(i,i+11);links.push(`https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${seg[0]}&destination=${seg.at(-1)}${seg.length>2?'&waypoints='+encodeURIComponent(seg.slice(1,-1).join('|')):''}`)}
+    ex.innerHTML=links.map((l,i)=>`<a class="btn" href="${l}" target="_blank" rel="noopener">Itinéraire Google Maps${links.length>1?' ('+(i+1)+'/'+links.length+')':''}</a>`).join('')+`<button id="tCopy">Copier la liste</button>`;
+    $('#tCopy').onclick=()=>{navigator.clipboard?.writeText(`Tournée du ${fmtD(date)}\n`+st.map((c,i)=>`${i+1}. ${dname(c)} – ${c.Voie1}, ${c.CodePostal} ${c.NomVille}${c.ContactPrincipal?' – '+c.ContactPrincipal:''}`).join('\n')).then(()=>toast('Liste copiée.'))}}
+  drawMap(st);
+}
+function drawMap(st){
+  if(typeof L==='undefined'){$('#mapNote').textContent='Carte indisponible.';return}
+  if(!map){map=L.map('map').setView([46.9,0.5],8);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);layer=L.layerGroup().addTo(map)}
+  setTimeout(()=>map.invalidateSize(),50);layer.clearLayers();
+  const ids=new Set(tour.stops);
+  candidates().forEach(c=>{if(!ids.has(c.id))L.circleMarker([c.lat,c.lon],{radius:4,color:'#8a94a6',weight:1,fillOpacity:.5}).bindTooltip(dname(c)).on('click',()=>addStop(c.id)).addTo(layer)});
+  const line=[];if(tour.start){line.push([tour.start.lat,tour.start.lon]);L.circleMarker([tour.start.lat,tour.start.lon],{radius:8,color:'#1a7f37',fillOpacity:1}).bindTooltip('Départ').addTo(layer)}
+  st.forEach((c,i)=>{line.push([c.lat,c.lon]);L.marker([c.lat,c.lon],{icon:L.divIcon({className:'',html:`<span class="num">${i+1}</span>`,iconSize:[24,24],iconAnchor:[12,12]})}).bindTooltip(dname(c)).on('click',()=>openClient(c.id)).addTo(layer)});
+  if(tour.start)line.push([tour.start.lat,tour.start.lon]);
+  if(line.length>1)L.polyline(line,{color:'#1f6feb',weight:3,opacity:.7}).addTo(layer);
+  if(line.length)map.fitBounds(L.latLngBounds(line).pad(.15));
+}
+function addStop(id){if(tour.stops.includes(id))return;tour.stops.push(id);tour.stops=orderStops(stopObjs(),tour.start).map(c=>c.id);tour.saved=false;renderTour();toast('Client ajouté à la tournée.')}
+async function loadTour(){const t=await DB.getMeta('tour:'+$('#tDate').value);if(t){tour.stops=t.stops;$('#tSect').value=t.sector;tour.saved=true;renderTour()}else{tour.stops=[];tour.saved=false;renderTour()}}
+async function setStart(s){tour.start=s;await DB.setMeta('start',s);$('#tStartNote').textContent=s?`Départ : ${s.label}`:'';if(tour.stops.length){tour.stops=orderStops(stopObjs(),tour.start).map(c=>c.id);renderTour()}}
+$('#tDate').onchange=async()=>{syncSector();await loadTour()};
+$('#tSect').onchange=()=>{tour.stops=[];renderTour()};
+$('#tBuild').onclick=buildTour;
+$('#tSaveTour').onclick=async()=>{await DB.setMeta('tour:'+$('#tDate').value,{stops:tour.stops,sector:$('#tSect').value});tour.saved=true;renderTour();toast('Tournée enregistrée pour le '+fmtD($('#tDate').value)+'.')};
+$('#tStops').onclick=async e=>{const b=e.target.closest('button,[data-id]');if(!b)return;
+  if(b.dataset.id)return openClient(b.dataset.id);
+  if(b.dataset.rm){tour.stops.splice(+b.dataset.rm,1);tour.saved=false;renderTour()}
+  if(b.dataset.up){const i=+b.dataset.up;[tour.stops[i-1],tour.stops[i]]=[tour.stops[i],tour.stops[i-1]];tour.saved=false;renderTour()}
+  if(b.dataset.visit){const c=stopObjs()[+b.dataset.visit];openClient(c.id,{focusVisit:true})}};
+$('#tAddQ').oninput=()=>{const q=norm($('#tAddQ').value);if(q.length<2){$('#tAddRes').innerHTML='';return}
+  const r=clients.filter(c=>c.inLastImport!==false&&c.lat!=null&&!tour.stops.includes(c.id)&&norm(dname(c)+' '+c.NomVille).includes(q)).sort(prioCmp).slice(0,8);
+  $('#tAddRes').innerHTML=r.map(c=>`<div class="inline" style="padding:4px 0"><span style="flex:1">${esc(dname(c))} <span class="note">${esc(c.NomVille)} · ${sector(c)}</span></span><button data-add="${esc(c.id)}">Ajouter</button></div>`).join('')||'<div class="note">Aucun client géocodé trouvé.</div>'};
+$('#tAddRes').onclick=e=>{const b=e.target.closest('[data-add]');if(b){addStop(b.dataset.add);$('#tAddQ').value='';$('#tAddRes').innerHTML=''}};
+async function geocodeText(q){for(const base of GEO_URLS){try{const r=await fetch(`${base}?q=${encodeURIComponent(q)}&limit=1`);if(!r.ok)continue;const f=(await r.json()).features?.[0];if(f)return{lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0],label:f.properties.label}}catch(e){}}return null}
+$('#tStartSave').onclick=async()=>{const q=$('#tStart').value.trim();if(!q)return setStart(null);const s=await geocodeText(q);if(s)setStart(s);else toast('Adresse introuvable (ou pas de connexion).')};
+$('#tGeoMe').onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>setStart({lat:p.coords.latitude,lon:p.coords.longitude,label:'ma position'}),()=>toast('Position indisponible.')):toast('Position indisponible.');
+function showTab(t){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$('main').style.display=t==='clients'?'':'none';$('#tourView').style.display=t==='tour'?'':'none';$('#dashView').style.display=t==='dash'?'':'none';if(t==='dash')renderDash();if(t==='tour'){if(map)setTimeout(()=>map.invalidateSize(),50);renderTour()}}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+async function initTour(){$('#tDate').value=iso(nextWorkday());syncSector();const s=await DB.getMeta('start');if(s){tour.start=s;$('#tStart').value=s.label==='ma position'?'':s.label;$('#tStartNote').textContent='Départ : '+s.label}await loadTour()}
+// ---------- Tableau de bord ----------
+const ST_COLORS={'Actif':'#1a7f37','Inactif':'#f08c00','Inactif Perdu':'#e03131','Perdu':'#7d1414','N/A':'#111111','Prospect':'#4c8dff'};
+function weekStart(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function miniList(arr,right,empty){return arr.length?'<ul class="mini">'+arr.map(c=>`<li data-id="${esc(c.id)}"><span>${esc(dname(c))} <span class="note">${esc(c.NomVille)}</span></span><span>${esc(right(c))}</span></li>`).join('')+'</ul>':`<div class="note">${empty}</div>`}
+function renderDash(){
+  const s=$('#dSect').value;const all=clients.filter(c=>c.inLastImport!==false&&(!s||sector(c)===s));const t=today();
+  const visits=all.flatMap(c=>(c.visits||[]).map(v=>({c,d:parseD(v.date)}))).filter(v=>v.d<=t);
+  const since=n=>visits.filter(v=>(t-v.d)/DAY<n).length;
+  const ws=weekStart(t),thisWeek=visits.filter(v=>v.d>=ws).length;
+  const actifs=all.filter(c=>c.EstActif);
+  const isProspect=c=>Object.values(ACTS).some(f=>c[f]==='Prospect')&&!Object.values(ACTS).some(f=>c[f]==='Actif');
+  const late=all.filter(c=>c.rec&&c.rec.every>0&&prio(c).rank===0).sort(prioCmp);
+  const notSeen90=actifs.filter(c=>{const l=lastVisit(c);return !l||(t-parseD(l))/DAY>=CFG.oldDays});
+  const kpi=(v,l)=>`<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`;
+  $('#dKpis').innerHTML=kpi(actifs.length,'clients actifs')+kpi(all.filter(isProspect).length,'prospects')+kpi(late.length,'récurrents à visiter')+kpi(thisWeek,'visites cette semaine')+kpi(since(30),'visites sur 30 jours')+kpi(notSeen90.length,`actifs non vus depuis ${CFG.oldDays} j`);
+  // visites par semaine
+  const weeks=[...Array(12)].map((_,i)=>{const a=new Date(ws);a.setDate(a.getDate()-7*(11-i));const b=new Date(a);b.setDate(b.getDate()+7);return{a,n:visits.filter(v=>v.d>=a&&v.d<b).length}});
+  const mx=Math.max(1,...weeks.map(w=>w.n));
+  $('#dWeeks').innerHTML=`<div class="bars" style="margin-top:18px">${weeks.map(w=>`<div style="height:${100*w.n/mx}%" title="Semaine du ${w.a.toLocaleDateString('fr-FR')} : ${w.n} visite(s)"><span>${w.n||''}</span></div>`).join('')}</div><div class="blabels">${weeks.map(w=>`<span>${w.a.getDate()}/${w.a.getMonth()+1}</span>`).join('')}</div>`;
+  // statuts par activité
+  const keys=Object.keys(ST_COLORS);
+  $('#dActs').innerHTML=Object.entries(ACTS).map(([k,f])=>{const n=keys.map(st=>all.filter(c=>c[f]===st).length);const tot=n.reduce((a,b)=>a+b,0)||1;
+    return `<div class="arow"><b>${k}</b><div class="stack">${n.map((v,i)=>v?`<i style="width:${100*v/tot}%;background:${ST_COLORS[keys[i]]}" title="${keys[i]} : ${v}"></i>`:'').join('')}</div><span class="note">${n[0]} actifs</span></div>`}).join('')+
+    `<div class="legend">${keys.map(k=>`<span><b style="background:${ST_COLORS[k]}"></b>${k}</span>`).join('')}</div>`;
+  $('#dLate').innerHTML=miniList(late.slice(0,10),c=>prio(c).label,'Aucun client récurrent en retard. Définissez une récurrence sur les fiches concernées.');
+  const old=actifs.slice().sort((a,b)=>(lastVisit(a)||'').localeCompare(lastVisit(b)||''));
+  $('#dOld').innerHTML=miniList(old.slice(0,10),c=>lastVisit(c)?'vu le '+fmtD(lastVisit(c)):'jamais visité','—');
+  const opp=actifs.filter(c=>Object.values(ACTS).some(f=>c[f]==='Actif')&&Object.values(ACTS).some(f=>c[f]==='Prospect'));
+  const oppBy=Object.entries(ACTS).map(([k,f])=>[k,opp.filter(c=>c[f]==='Prospect'&&Object.values(ACTS).some(g=>c[g]==='Actif'))]);
+  $('#dOpp').innerHTML=`<div class="note" style="margin-bottom:6px">${opp.length} client(s) actif(s) sur une activité et prospect sur une autre.</div>`+'<ul class="mini">'+oppBy.map(([k,l])=>`<li data-opp="${k}"><span><b>${k}</b></span><span>${l.length} client(s) à proposer</span></li>`).join('')+'</ul>';
+  $('#dOpp').onclick=e=>{const li=e.target.closest('[data-opp]');if(!li)return;const l=oppBy.find(x=>x[0]===li.dataset.opp)[1].slice().sort(prioCmp);
+    $('#dOpp').innerHTML=`<button id="dBack2" style="margin-bottom:6px">← Retour</button><div class="note">${l.length} client(s) à qui proposer l\u2019activité ${esc(li.dataset.opp)}</div>`+miniList(l.slice(0,50),c=>'secteur '+sector(c),'—');$('#dBack2').onclick=e2=>{e2.stopPropagation();renderDash()}};
+  const inc=[['sans contact',c=>!c.ContactPrincipal],['sans e-mail',c=>!c.EmailContactPrincipal],['sans protocole sécurité',c=>!c.ProtocoleSecurite],['position approximative',c=>c.lat==null||c.geoScore<0.5]];
+  $('#dIncomplete').innerHTML='<ul class="mini">'+inc.map(([l,f])=>`<li data-inc="${esc(l)}"><span>${l}</span><span>${actifs.filter(f).length}</span></li>`).join('')+'</ul>';
+  $('#dIncomplete').onclick=e=>{const li=e.target.closest('[data-inc]');if(!li)return;const f=inc.find(x=>x[0]===li.dataset.inc)[1];const l=actifs.filter(f);
+    $('#dIncomplete').innerHTML=`<button id="dBack" style="margin-bottom:6px">← Retour</button><div class="note">${l.length} client(s) actif(s) ${esc(li.dataset.inc)}</div>`+miniList(l.slice(0,50),c=>'secteur '+sector(c), '—');$('#dBack').onclick=e2=>{e2.stopPropagation();renderDash()}};
+}
+$('#dSect').onchange=renderDash;
+$('#dashView').addEventListener('click',e=>{const li=e.target.closest('li[data-id]');if(li)openClient(li.dataset.id)});
+
+// ---------- Nouveau client ----------
+let editing=null;
+function openClientForm(c){
+  editing=c||null;const f=$('#newForm');f.reset();
+  $('#nActs').innerHTML=Object.keys(ACTS).map(k=>`<div><label for="nA${k}">${k}</label><select id="nA${k}" data-act="${k}">${STATUTS.map(x=>`<option>${x}</option>`).join('')}</select></div>`).join('');
+  $('#newTitle').textContent=c?'Modifier le client':'Nouveau client';$('#nSave').textContent=c?'Enregistrer':'Créer le client';
+  if(c){$('#nName').value=c.RaisonSociale||'';$('#nDen').value=c.ClientDenomination||'';$('#nVoie').value=c.Voie1||'';$('#nCP').value=c.CodePostal||'';$('#nVille').value=c.NomVille||'';
+    $('#nContact').value=c.ContactPrincipal||'';$('#nEmail').value=c.EmailContactPrincipal||'';$('#nRdv').value=c.RDVObligatoire==='OUI'?'OUI':'NON';$('#nCom').value=c.CommentaireTournee||'';
+    $('#nRecN').value=c.rec?.every||'';$('#nRecU').value=c.rec?.unit||'semaine';
+    Object.entries(ACTS).forEach(([k,fld])=>$('#nA'+k).value=c[fld]||'Prospect')}
+  else Object.keys(ACTS).forEach(k=>$('#nA'+k).value='Prospect');
+  $('#newDlg').showModal();$('#nName').focus();
+}
+$('#btnNew').onclick=()=>openClientForm();
+$('#newForm').onsubmit=async e=>{e.preventDefault();
+  const v=id=>$(id).value.trim();const acts={};Object.entries(ACTS).forEach(([k,fld])=>acts[fld]=$('#nA'+k).value);
+  const vals=Object.values(acts);const actif=vals.includes('Actif');
+  const seg=actif?'Actif':vals.every(x=>x==='Prospect'||x==='N/A')?'Prospect':'Perdu/inactif';const n=parseInt($('#nRecN').value,10);
+  const now=new Date().toISOString();
+  const data={RaisonSociale:v('#nName').toUpperCase(),ClientDenomination:v('#nDen').toUpperCase(),Voie1:v('#nVoie').toUpperCase(),CodePostal:v('#nCP'),NomVille:v('#nVille').toUpperCase(),
+    ContactPrincipal:v('#nContact'),EmailContactPrincipal:v('#nEmail'),RDVObligatoire:$('#nRdv').value,CommentaireTournee:v('#nCom'),...acts,EstActif:actif,Segment:seg,
+    rec:n>0?{every:n,unit:$('#nRecU').value}:null,updatedAt:now,manualAt:Object.fromEntries(Object.values(ACTS).map(f=>[f,todayIso()]))};
+  let c;
+  if(editing){c=editing;const moved=c.Voie1!==data.Voie1||String(c.CodePostal)!==data.CodePostal||c.NomVille!==data.NomVille;Object.assign(c,data);if(moved){c.lat=c.lon=c.geoScore=null}}
+  else{const code='N'+Date.now().toString(36).toUpperCase();
+    c={id:code+'|manuel',Code:code,MetierClient:'',Commercial:'',DateCreation:now.slice(0,10),...data,visits:[],noteLog:[],lat:null,lon:null,geoScore:null,manual:true,inLastImport:true,createdAt:now};clients.push(c)}
+  if(c.lat==null&&navigator.onLine){try{await geocodeOne(c)}catch(err){}}
+  await DB.put([c]);clients=await DB.all();refreshOptions();render();$('#newDlg').close();
+  toast(`${editing?'Client modifié':'Client créé'}${c.lat==null?' (position GPS à calculer : bouton Géocoder)':''}.`);
+  openClient(c.id);editing=null;
+};
+
+const DAYN={1:'Lundi',2:'Mardi',3:'Mercredi',4:'Jeudi',5:'Vendredi',6:'Samedi'};
+function applySettings(){
+  const r=document.documentElement;if(CFG.theme==='auto')r.removeAttribute('data-theme');else r.dataset.theme=CFG.theme;
+  r.style.setProperty('--accent',CFG.accent);document.querySelector('meta[name=theme-color]').content=CFG.accent;
+  document.body.classList.toggle('compact',!!CFG.compact);$('#appTitle').textContent=CFG.title;document.title=CFG.title;
+  $('#optOld').textContent=`Pas vu depuis ${CFG.oldDays} j et plus`;
+  $('#tN').value=CFG.visits;const tr=$('#tR');if(![...tr.options].some(o=>+o.value===+CFG.radius))tr.insertAdjacentHTML('afterbegin',`<option value="${+CFG.radius}">${+CFG.radius} km</option>`);tr.value=String(+CFG.radius);$('#tPool').value=CFG.pool;
+}
+function openSettings(){
+  $('#setDays').innerHTML=Object.entries(DAYN).map(([d,n])=>`<div><label for="sDay${d}">${n}</label><select id="sDay${d}"><option value="">Pas de tournée</option><option value="86">Secteur 86</option><option value="37">Secteur 37</option></select></div>`).join('');
+  Object.keys(DAYN).forEach(d=>$('#sDay'+d).value=CFG.days[d]||'');
+  $('#sVisits').value=CFG.visits;$('#sRadius').value=CFG.radius;$('#sPool').value=CFG.pool;$('#sOld').value=CFG.oldDays;$('#sInM').value=CFG.inactiveMonths;$('#sLoM').value=CFG.lostMonths;$('#sSoon').value=CFG.soonDays;
+  $('#sTitle').value=CFG.title;$('#sIni').value=CFG.initials;$('#sTheme').value=CFG.theme;$('#sAccent').value=CFG.accent;$('#sStart').value=CFG.startTab;$('#sSort').value=CFG.sort;$('#sCompact').checked=!!CFG.compact;
+  $('#setFields').innerHTML=Object.entries(FIELD_LABELS).map(([k,l])=>`<label><input type="checkbox" data-f="${k}" style="width:auto" ${CFG.fields[k]?'checked':''}> ${l}</label>`).join('');
+  $('#setDlg').showModal();
+}
+async function saveSettings(c){CFG=c;await DB.setMeta('settings',CFG);{const ch=clients.filter(x=>autoStatus(x));if(ch.length)await DB.put(ch)}applySettings();$('#sort').value=CFG.sort;render();syncSector();if($('#dashView').style.display!=='none')renderDash();if($('#tourView').style.display!=='none')renderTour()}
+$('#btnSet').onclick=openSettings;
+$('#setSave').onclick=async()=>{const n=(id,min,max,def)=>{const v=parseInt($(id).value,10);return isNaN(v)?def:Math.min(max,Math.max(min,v))};
+  const days={};Object.keys(DAYN).forEach(d=>days[d]=$('#sDay'+d).value);const fields={};document.querySelectorAll('#setFields [data-f]').forEach(i=>fields[i.dataset.f]=i.checked);
+  await saveSettings({days,visits:n('#sVisits',1,25,8),radius:n('#sRadius',5,999,30),pool:$('#sPool').value,oldDays:n('#sOld',7,365,60),soonDays:n('#sSoon',0,30,7),inactiveMonths:n('#sInM',1,60,10),lostMonths:n('#sLoM',1,120,18),
+    title:$('#sTitle').value.trim()||DEFAULTS.title,initials:($('#sIni').value.trim().toUpperCase().replace(/[^A-Z]/g,'')||DEFAULTS.initials),theme:$('#sTheme').value,accent:$('#sAccent').value,startTab:$('#sStart').value,sort:$('#sSort').value,compact:$('#sCompact').checked,fields});
+  $('#setDlg').close();toast('Paramètres enregistrés.')};
+$('#setReset').onclick=async()=>{if(!confirm('Revenir aux paramètres par défaut ?'))return;await saveSettings(JSON.parse(JSON.stringify(DEFAULTS)));$('#setDlg').close();toast('Paramètres par défaut rétablis.')};
+async function loadSettings(){const s=await DB.getMeta('settings');if(s)CFG={...JSON.parse(JSON.stringify(DEFAULTS)),...s,fields:{...DEFAULTS.fields,...(s.fields||{})},days:{...DEFAULTS.days,...(s.days||{})}};applySettings();$('#sort').value=CFG.sort}
+
+(async()=>{try{await DB.open();clients=await DB.all();await loadSettings();
+  const ch=[];for(const c of clients){let m=false;if(c.notes&&String(c.notes).trim()){migrateNotes(c);m=true}for(const f of Object.values(ACTS)){const v=normStatus(c[f]);if(v!==c[f]){c[f]=v;m=true}}if(c.fileStatus)for(const f in c.fileStatus)c.fileStatus[f]=normStatus(c.fileStatus[f]);if(autoStatus(c)||m)ch.push(c)}
+  if(ch.length)await DB.put(ch)}catch(e){applySettings();toast('Stockage local indisponible dans ce navigateur : les données ne seront pas conservées.')}refreshOptions();render();try{await initTour()}catch(e){console.error(e)}
+  if(CFG.startTab!=='clients')showTab(CFG.startTab);
+  if(FS_OK){try{const h=await DB.getMeta('dataFile');if(h){dataFile=h;const p=await h.queryPermission({mode:'readwrite'});showFileState(p==='granted'?'Relié à '+h.name+'.':'Relié à '+h.name+' : cliquez sur « Reprendre » pour continuer à y enregistrer.');if(p!=='granted')$('#btnResume').style.display='';else await syncLinkedFile()}}catch(e){}}
+  if(location.protocol.startsWith('http')&&'serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>

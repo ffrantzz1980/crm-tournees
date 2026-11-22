@@ -1,0 +1,27 @@
+CRM TOURNÉES – UNE SEULE APPLICATION POUR PC, CLÉ USB, WEB ET MOBILE
+=====================================================================
+
+Ce dossier EST l'application. Le même dossier sert partout :
+
+• Sur PC ou clé USB : copiez le dossier (sur la clé si vous voulez) et ouvrez
+  « crm-tournees.html » avec Google Chrome ou Microsoft Edge. Rien à installer.
+
+• Sur le web et le téléphone : publiez ce même dossier sur un hébergement https
+  (ex. GitHub Pages). Sur le téléphone, ouvrez l'adresse puis
+  « Ajouter à l'écran d'accueil » : l'appli s'installe et marche hors connexion.
+
+VOS DONNÉES
+-----------
+Elles restent sur chaque appareil. Pour les retrouver partout :
+1. Sur PC : Sauvegarde > « Créer un fichier de données… » et enregistrez
+   « crm-donnees.json » dans ce dossier (sur la clé). Chaque modification y est
+   enregistrée. Sur un autre PC, ou dans la version web ouverte sur ce PC :
+   « Ouvrir un fichier de données… » et choisissez ce même fichier : tout se
+   synchronise automatiquement.
+2. Avec le téléphone : Sauvegarde > « 2. Envoyer le fichier synchronisé »
+   (Google Drive, e-mail…), puis sur l'autre appareil « 1. Synchroniser avec
+   un fichier… ». Les données sont FUSIONNÉES : visites et notes réunies,
+   saisie la plus récente gardée, rien n'est écrasé.
+
+Internet n'est nécessaire que pour le géocodage des adresses, le fond de
+carte et les liens Google Maps / Waze.
